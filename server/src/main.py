@@ -44,7 +44,13 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         # El primer mensaje que recibimos debería ser el nombre del usuario.
         name = await websocket.receive_text()
-        connected_clients[websocket] = name
+        if name in connected_clients.values():
+            await websocket.send_text("ERROR: Nombre ya en uso")
+            await websocket.close()
+            return
+        else:
+            connected_clients[websocket] = name
+            await websocket.send_text("OK")
         while True:
             msg = await websocket.receive_text()
             for client, client_name in connected_clients.items():

@@ -69,6 +69,11 @@ async def main():
                 retries = 0
                 # Enviar el nombre primero al servidor
                 await ws.send(name)
+                response = await ws.recv()
+                if response.startswith("ERROR:"):
+                    logger.warning(response)
+                    name = input("Intenta otro nombre: ").strip()
+                    continue
                 logger.info(f"Conectado a {url}. Puedes empezar a chatear.")
                 
                 send_task = asyncio.create_task(send(ws))
