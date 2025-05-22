@@ -43,14 +43,18 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     try:
         # El primer mensaje que recibimos debería ser el nombre del usuario.
-        nombre = await websocket.receive_text()
-        connected_clients[websocket] = nombre
+        name = await websocket.receive_text()
+        connected_clients[websocket] = name
         while True:
             msg = await websocket.receive_text()
             for client, client_name in connected_clients.items():
                 if client != websocket:
-                    await client.send_text(f"{nombre}: {msg}")
-    except WebSocketDisconnect:
+                    await client.send_text(f"{name}: {msg}")
+    except WebSocketDisconnect as e:
+        connected_clients.pop(websocket, None)
+        logger.info(f"Cliente {name} desconectado. {e}")
+    except Exception as e:
+        logger.error(f"Error en la conexión: {e}")
         connected_clients.pop(websocket, None)
 
 if __name__ == "__main__":
