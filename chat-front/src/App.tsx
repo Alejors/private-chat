@@ -25,13 +25,13 @@ const App: React.FC = () => {
       }
     } else if (phase === "name") {
       setName(inputValue);
-      setInputValue("");
       const ws = new WebSocket(serverUrl);
       wsRef.current = ws;
 
       ws.onopen = (): void => {
-        ws.send(name);
+        ws.send(inputValue);
       };
+      setInputValue("");
 
       ws.onmessage = (event: MessageEvent<string>): void => {
         const msg: string = event.data;
@@ -66,10 +66,25 @@ const App: React.FC = () => {
       const msg: string = event.data;
       setMessages((prev: string[]) => [...prev, msg]);
     };
+  
+    const handleBeforeUnload = () => {
+      ws.close();
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     ws.addEventListener("message", onMessage);
-    return () => {
+    ws.onclose = (): void => {
+      setMessages((prev: string[]) => [...prev, "Conexión cerrada por el servidor."]);
+      wsRef.current = null;
+      setPhase("url");
+    };
+
+    return () => {   
       ws.removeEventListener("message", onMessage);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      ws.close();
+      wsRef.current = null;
     };
   }, [phase]);
 
@@ -84,6 +99,7 @@ const App: React.FC = () => {
     }
     setMessages([]);
     setName("");
+    setServerUrl("");
     setPhase("url");
   };
 
@@ -105,6 +121,7 @@ const App: React.FC = () => {
 
       {phase === "chat" && (
         <>
+          <h1>Bienvenido, {name}!</h1>
           <button id="exit_button" type="button" onClick={handleCloseConnection}>Salir</button>
           <div id="chat_div">
             {messages.map((msg: string, idx: number) => (
