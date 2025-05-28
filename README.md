@@ -4,8 +4,9 @@
 
 This project implements a simple **Private Chat** system using WebSockets, consisting of two components:
 
-- Server: Handles WebSocket connections and message broadcasting.
-- Client: Connects to the server via WebSocket to send and receive messages in real-time.
+- **Server**: Handles WebSocket connections and message broadcasting.
+- **CLI Client**: Connects to the server via WebSocket to send and receive messages in real-time.
+- **GUI Client:** A web-based graphical interface for chatting, built with React.
 
 ---
 
@@ -15,6 +16,7 @@ This project implements a simple **Private Chat** system using WebSockets, consi
 - Automatic public URL creation using ngrok (optional).
 - Dockerized server for isolated, secure deployment.
 - Client supports username identification and message broadcasting.
+- **Web GUI client for a user-friendly chat experience.**
 
 ---
 
@@ -22,6 +24,7 @@ This project implements a simple **Private Chat** system using WebSockets, consi
 
 - Docker installed on your system.
 - (Optional) An ngrok account with an authentication token if you want to expose the server publicly.
+- Node.js (if running the GUI client locally).
 
 ---
 
@@ -54,7 +57,7 @@ This project implements a simple **Private Chat** system using WebSockets, consi
 
 ---
 
-### Client
+### Client (CLI)
 
 1. Run the client script
 
@@ -71,9 +74,53 @@ The client will prompt for the WebSocket server URL:
 
 ---
 
+### GUI Client (Web)
+
+A graphical web client is available for a more user-friendly chat experience.
+
+#### Recommended: Run Locally
+
+Running the GUI client locally is **recommended** for development and general use, as it ensures proper handling and closure of TCP ports when you close the browser or stop the development server.
+
+1. Install dependencies and start the client:
+
+    ```
+    cd chat-front
+    npm install
+    npm run dev
+    ```
+
+2. Open your browser and navigate to [http://localhost:5173](http://localhost:5173).
+
+3. Enter the WebSocket server URL when prompted (see above for options) and your Username.
+
+#### Alternative: Run with Docker
+
+You can also run the GUI client in a Docker container:
+
+1. Build and run the Docker container:
+
+    ```
+    cd chat-front
+    docker build -t chat-front .
+    docker run --name front -p 5173:5173 chat-front
+    ```
+
+2. Open your browser and navigate to [http://localhost:5173](http://localhost:5173).
+
+**Important:**  
+When running the GUI client in Docker, there is a known issue where the TCP port used by the development server (Vite) may not close immediately when stopping the container.  
+- You may need to ensure the container is fully stopped (`docker stop front` or `docker kill front`) to release the port.
+- This is a limitation of how some development servers handle process signals inside containers.
+
+**For best results and to avoid lingering TCP connections, prefer running the GUI client locally during development.**
+
+---
+
 ## Notes
 
 - WebSocket connections use secure `wss://` when ngrok exposes an HTTPS tunnel.
 - Local connections use `ws://` without encryption.
 - The server is designed to broadcast messages to all other clients, excluding the sender.
 - The project uses FastAPI for the server and Python asyncio-based client for simplicity and efficiency.
+- The GUI client is built with React and Vite for a modern web experience.
